@@ -8,3 +8,6 @@ verify_jwt = true
 
 [functions.social-compliment]
 verify_jwt = true
+
+[functions.codex-report]
+verify_jwt = true

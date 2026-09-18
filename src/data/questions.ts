@@ -52,7 +52,7 @@ export function getDailyQuestion(): Question {
   return QUESTIONS[daysSinceEpoch % QUESTIONS.length];
 }
 
-function isSameUTCDate(isoA: string, isoB: string) {
+export function isSameUTCDate(isoA: string, isoB: string) {
   const a = new Date(isoA);
   const b = new Date(isoB);
   return (

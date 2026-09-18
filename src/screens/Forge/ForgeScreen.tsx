@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { CardView } from '../../components/Card';
 import { RevealAnimation } from '../Discover/RevealAnimation';
 import { supabase } from '../../lib/supabase';
+import { isSameUTCDate } from '../../data/questions';
 import type { Card, Candidate } from '../../types';
 import { Altar } from './Altar';
 import { useForgeAnimation, type ForgeRefs } from './useForgeAnimation';
 
 const SLOT_COUNT = 3;
+const DAILY_FORGE_LIMIT = 3;
 
 function railOrder(c: Card) {
   if (c.type === 'composite') return 2;
@@ -42,6 +44,11 @@ export function ForgeScreen({
 
   const filledCards = slots.filter((c): c is Card => c !== null);
   const railCards = [...cards].sort((a, b) => railOrder(a) - railOrder(b));
+
+  const todayForgeCount = cards.filter(
+    (c) => c.type === 'composite' && isSameUTCDate(c.created_at, new Date().toISOString())
+  ).length;
+  const forgesLeft = Math.max(0, DAILY_FORGE_LIMIT - todayForgeCount);
 
   useEffect(() => {
     playIntro();
@@ -83,7 +90,7 @@ export function ForgeScreen({
   }
 
   function handleCombine() {
-    if (filledCards.length < 2 || combining) return;
+    if (filledCards.length < 2 || combining || forgesLeft <= 0) return;
     setCombining(true);
     setError(null);
     playCombine(async () => {
@@ -131,13 +138,17 @@ export function ForgeScreen({
 
   return (
     <div className="forge-screen">
+      <div className={`forge-limit ${forgesLeft === 0 ? 'forge-limit--empty' : ''}`}>
+        오늘 남은 조합 기회: {forgesLeft} / {DAILY_FORGE_LIMIT}
+      </div>
+
       <Altar
         refs={refs}
         slots={slots}
         onClearSlot={clearSlot}
         onDropCard={dropCard}
         onCombine={handleCombine}
-        canCombine={filledCards.length >= 2 && !candidates}
+        canCombine={filledCards.length >= 2 && !candidates && forgesLeft > 0}
         combining={combining}
       />
 
