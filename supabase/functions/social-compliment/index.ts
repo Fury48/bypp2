@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
       throw new Error(`failed to record compliment: ${errText}`);
     }
 
-    await svc('notifications', {
+    const notifRes = await svc('notifications', {
       method: 'POST',
       body: JSON.stringify({
         user_id: toUserId,
@@ -132,6 +132,7 @@ Deno.serve(async (req) => {
         card_id: newCard.id,
       }),
     });
+    if (!notifRes.ok) throw new Error(`failed to create notification: ${await notifRes.text()}`);
 
     return new Response(JSON.stringify({ ok: true }), { headers: jsonHeaders });
   } catch (e) {

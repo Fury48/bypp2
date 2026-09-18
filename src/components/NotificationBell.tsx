@@ -12,6 +12,8 @@ interface Notification {
   created_at: string;
 }
 
+const POLL_INTERVAL_MS = 15000;
+
 export function NotificationBell() {
   const [items, setItems] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
@@ -27,6 +29,27 @@ export function NotificationBell() {
 
   useEffect(() => {
     refresh();
+
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    supabase.auth.getUser().then(({ data }) => {
+      const userId = data.user?.id;
+      if (!userId) return;
+      channel = supabase
+        .channel(`notifications:${userId}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
+          () => refresh()
+        )
+        .subscribe();
+    });
+
+    const poll = setInterval(refresh, POLL_INTERVAL_MS);
+
+    return () => {
+      clearInterval(poll);
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [refresh]);
 
   const unreadCount = items.filter((n) => !n.read).length;
@@ -66,7 +89,14 @@ export function NotificationBell() {
 
   return (
     <div className="notif-wrap">
-      <button className="notif-bell-btn" onClick={() => setOpen((o) => !o)} title="알림">
+      <button
+        className="notif-bell-btn"
+        onClick={() => {
+          setOpen((o) => !o);
+          refresh();
+        }}
+        title="알림"
+      >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M6 10a6 6 0 1 1 12 0c0 3 1 5 1.5 6H4.5C5 15 6 13 6 10Z" />
           <path d="M10 19a2 2 0 0 0 4 0" />
