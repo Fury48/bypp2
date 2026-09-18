@@ -52,6 +52,8 @@ body {
 
 .app-main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   padding: 32px 24px 100px;
   max-width: 720px;
   margin: 0 auto;
@@ -477,10 +479,13 @@ body {
 
 /* Forge */
 .forge-screen {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 24px;
+  width: 100%;
+  min-height: 0;
 }
 
 .forge-stage {
@@ -567,6 +572,11 @@ body {
     height: 120px;
     font-size: 0.68rem;
   }
+
+  .forge-rail__grid .card--sm {
+    width: 130px;
+    height: 195px;
+  }
 }
 
 .forge-flash {
@@ -602,9 +612,15 @@ body {
   color: #e08a6a;
 }
 
-.forge-candidates,
+.forge-candidates {
+  width: 100%;
+}
+
 .forge-rail {
   width: 100%;
+  flex: 1;
+  display: flex;
+  min-height: 0;
 }
 
 .forge-candidates h3 {
@@ -626,10 +642,12 @@ body {
 .forge-rail__grid {
   display: flex;
   flex-wrap: nowrap;
+  align-items: center;
   overflow-x: auto;
-  gap: 12px;
+  gap: 16px;
   padding: 4px 4px 12px;
   scroll-snap-type: x proximity;
+  width: 100%;
 }
 
 .forge-rail__grid > * {
