@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { supabase } from '../../lib/supabase';
 import { SignageTitle } from '../../components/SignageTitle';
+import loginPanelArt from '../../../assets/background/login.png';
 
 export function AuthScreen() {
   const [mode, setMode] = useState<'login' | 'signup'>('login');
@@ -56,23 +57,6 @@ export function AuthScreen() {
     <div className="auth-screen">
       <SignageTitle title="강점의 조각" subtitle="나를 발견하고, 조합하고, 기록하세요" />
       <form className="auth-form" onSubmit={handleSubmit}>
-        <input
-          className="auth-input"
-          type="email"
-          placeholder="이메일"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          className="auth-input"
-          type="password"
-          placeholder="비밀번호"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          minLength={6}
-          required
-        />
         {mode === 'signup' && (
           <input
             className="auth-input"
@@ -85,11 +69,30 @@ export function AuthScreen() {
             required
           />
         )}
+        <div className="auth-panel" style={{ backgroundImage: `url(${loginPanelArt})` }}>
+          <input
+            className="auth-panel-input auth-panel-input--email"
+            type="email"
+            placeholder="이메일"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            className="auth-panel-input auth-panel-input--password"
+            type="password"
+            placeholder="비밀번호"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            minLength={6}
+            required
+          />
+          <button className="auth-panel-submit" type="submit" disabled={loading}>
+            {loading ? '처리 중...' : mode === 'login' ? '로그인' : '회원가입'}
+          </button>
+        </div>
         {error && <div className="auth-error">{error}</div>}
         {notice && <div className="auth-notice">{notice}</div>}
-        <button className="auth-submit" type="submit" disabled={loading}>
-          {loading ? '처리 중...' : mode === 'login' ? '로그인' : '회원가입'}
-        </button>
       </form>
       <button
         className="auth-toggle"
