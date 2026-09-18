@@ -55,7 +55,7 @@ export function AuthScreen() {
 
   return (
     <div className="auth-screen">
-      <SignageTitle title="강점의 조각" subtitle="나를 발견하고, 조합하고, 기록하세요" />
+      <SignageTitle title="FULL HOUSE" subtitle="나를 발견하고, 조합하고, 기록하세요" />
       <form className="auth-form" onSubmit={handleSubmit}>
         {mode === 'signup' && (
           <input
