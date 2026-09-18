@@ -10,6 +10,7 @@ import {
 import type { Card, Candidate } from '../../types';
 import { RevealAnimation } from './RevealAnimation';
 import { SignageTitle } from '../../components/SignageTitle';
+import questionBoxArt from '../../../assets/discover/question_box.png';
 
 export function DiscoverScreen({
   cards,
@@ -89,11 +90,14 @@ export function DiscoverScreen({
     <div className="discover-screen">
       <SignageTitle title="DISCOVER" subtitle="질문에 답하고 나의 강점을 발견하세요" />
       {answeredToday ? (
-        <div className="discover-card discover-waiting">
+        <div
+          className="discover-card discover-waiting"
+          style={{ backgroundImage: `url(${questionBoxArt})` }}
+        >
           <p>내일 찾게 될 나의 강점을 기다려주세요</p>
         </div>
       ) : (
-        <div className="discover-card">
+        <div className="discover-card" style={{ backgroundImage: `url(${questionBoxArt})` }}>
           {!onboardingDone && (
             <div className="discover-onboarding-badge">
               첫 걸음 {onboardingStep + 1} / {ONBOARDING_QUESTIONS.length}
