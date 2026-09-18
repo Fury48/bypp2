@@ -1,11 +1,15 @@
 import type { DragEvent } from 'react';
-import type { CardType } from '../types';
+import type { CardSubtype, CardType } from '../types';
+import characterCardArt from '../../assets/cards/character_card.png';
+import talentCardArt from '../../assets/cards/talent_card.png';
+import fusionCardArt from '../../assets/cards/fusion_card.png';
 import './Card.css';
 
 interface CardProps {
   name?: string;
   description?: string | null;
   type?: CardType;
+  subtype?: CardSubtype | null;
   recipe?: string;
   faceDown?: boolean;
   unknown?: boolean;
@@ -16,10 +20,16 @@ interface CardProps {
   onDragStart?: (e: DragEvent<HTMLDivElement>) => void;
 }
 
+function cardArtFor(type: CardType, subtype?: CardSubtype | null) {
+  if (type === 'composite') return fusionCardArt;
+  return subtype === 'character' ? characterCardArt : talentCardArt;
+}
+
 export function CardView({
   name,
   description,
   type = 'base',
+  subtype,
   recipe,
   faceDown,
   unknown,
@@ -40,9 +50,13 @@ export function CardView({
     .filter(Boolean)
     .join(' ');
 
+  const style =
+    faceDown || unknown ? undefined : { backgroundImage: `url(${cardArtFor(type, subtype)})` };
+
   return (
     <div
       className={classes}
+      style={style}
       onClick={onClick}
       draggable={draggable}
       onDragStart={onDragStart}

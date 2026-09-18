@@ -112,7 +112,7 @@ export function ForgeScreen({
   }
 
   if (reveal) {
-    return <RevealAnimation cards={reveal} onDone={() => setReveal(null)} />;
+    return <RevealAnimation cards={reveal} type="composite" onDone={() => setReveal(null)} />;
   }
 
   return (
@@ -151,6 +151,7 @@ export function ForgeScreen({
                 name={c.name}
                 description={c.description}
                 type={c.type}
+                subtype={c.subtype}
                 size="sm"
                 draggable
                 selected={isInSlots(c.id)}

@@ -41,12 +41,30 @@ export function isOnboardingComplete(cards: Card[]) {
   return ONBOARDING_QUESTIONS.every((q) => answered.has(q.id));
 }
 
-export function getNextQuestion(cards: Card[]): Question {
+export function getNextOnboardingQuestion(cards: Card[]): Question | null {
   const answered = answeredIds(cards);
-  const nextOnboarding = ONBOARDING_QUESTIONS.find((q) => !answered.has(q.id));
-  if (nextOnboarding) return nextOnboarding;
+  return ONBOARDING_QUESTIONS.find((q) => !answered.has(q.id)) ?? null;
+}
 
-  const unanswered = QUESTIONS.filter((q) => !answered.has(q.id));
-  const pool = unanswered.length > 0 ? unanswered : QUESTIONS;
-  return pool[Math.floor(Math.random() * pool.length)];
+/** 모든 유저에게 동일한, 하루에 하나씩 바뀌는 질문. */
+export function getDailyQuestion(): Question {
+  const daysSinceEpoch = Math.floor(Date.now() / 86400000);
+  return QUESTIONS[daysSinceEpoch % QUESTIONS.length];
+}
+
+function isSameUTCDate(isoA: string, isoB: string) {
+  const a = new Date(isoA);
+  const b = new Date(isoB);
+  return (
+    a.getUTCFullYear() === b.getUTCFullYear() &&
+    a.getUTCMonth() === b.getUTCMonth() &&
+    a.getUTCDate() === b.getUTCDate()
+  );
+}
+
+/** 오늘의 질문에 이미 답했는지 여부 (온보딩 완료 이후에만 의미 있음). */
+export function hasAnsweredToday(cards: Card[]): boolean {
+  const today = getDailyQuestion();
+  const now = new Date().toISOString();
+  return cards.some((c) => c.source_question_id === today.id && isSameUTCDate(c.created_at, now));
 }

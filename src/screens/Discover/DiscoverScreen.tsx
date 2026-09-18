@@ -1,6 +1,12 @@
 import { useMemo, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { ONBOARDING_QUESTIONS, getNextQuestion } from '../../data/questions';
+import {
+  ONBOARDING_QUESTIONS,
+  getNextOnboardingQuestion,
+  getDailyQuestion,
+  hasAnsweredToday,
+  isOnboardingComplete,
+} from '../../data/questions';
 import type { Card, Candidate } from '../../types';
 import { RevealAnimation } from './RevealAnimation';
 import { SignageTitle } from '../../components/SignageTitle';
@@ -8,17 +14,26 @@ import { SignageTitle } from '../../components/SignageTitle';
 export function DiscoverScreen({
   cards,
   refresh,
+  onOnboardingComplete,
 }: {
   cards: Card[];
   refresh: () => Promise<void>;
+  onOnboardingComplete?: () => void;
 }) {
-  const question = useMemo(() => getNextQuestion(cards), [cards]);
-  const onboardingStep = ONBOARDING_QUESTIONS.findIndex((q) => q.id === question.id);
-  const isOnboarding = onboardingStep !== -1;
+  const onboardingDone = isOnboardingComplete(cards);
+  const nextOnboardingQuestion = useMemo(() => getNextOnboardingQuestion(cards), [cards]);
+  const onboardingStep = nextOnboardingQuestion
+    ? ONBOARDING_QUESTIONS.findIndex((q) => q.id === nextOnboardingQuestion.id)
+    : -1;
+  const isLastOnboardingQuestion = onboardingStep === ONBOARDING_QUESTIONS.length - 1;
+
+  const question = onboardingDone ? getDailyQuestion() : nextOnboardingQuestion!;
+  const answeredToday = onboardingDone && hasAnsweredToday(cards);
 
   const [answer, setAnswer] = useState('');
   const [loading, setLoading] = useState(false);
   const [revealCards, setRevealCards] = useState<Candidate[] | null>(null);
+  const [revealWasFinalOnboarding, setRevealWasFinalOnboarding] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit() {
@@ -45,10 +60,12 @@ export function DiscoverScreen({
           name: c.name,
           description: c.description,
           type: 'base' as const,
+          subtype: c.subtype ?? null,
           source_question_id: question.id,
         }))
       );
 
+      setRevealWasFinalOnboarding(!onboardingDone && isLastOnboardingQuestion);
       setRevealCards(newCards);
       setAnswer('');
       await refresh();
@@ -59,32 +76,43 @@ export function DiscoverScreen({
     }
   }
 
+  function handleRevealDone() {
+    setRevealCards(null);
+    if (revealWasFinalOnboarding) onOnboardingComplete?.();
+  }
+
   if (revealCards) {
-    return <RevealAnimation cards={revealCards} onDone={() => setRevealCards(null)} />;
+    return <RevealAnimation cards={revealCards} onDone={handleRevealDone} />;
   }
 
   return (
     <div className="discover-screen">
       <SignageTitle title="DISCOVER" subtitle="질문에 답하고 나의 강점을 발견하세요" />
-      <div className="discover-card">
-        {isOnboarding && (
-          <div className="discover-onboarding-badge">
-            첫 걸음 {onboardingStep + 1} / {ONBOARDING_QUESTIONS.length}
-          </div>
-        )}
-        <h2 className="discover-question">{question.text}</h2>
-        <textarea
-          className="discover-answer"
-          value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
-          placeholder="솔직하게 답해보세요..."
-          rows={4}
-        />
-        {error && <div className="discover-error">{error}</div>}
-        <button className="discover-submit" onClick={handleSubmit} disabled={loading || !answer.trim()}>
-          {loading ? '발견 중...' : '강점 발견하기'}
-        </button>
-      </div>
+      {answeredToday ? (
+        <div className="discover-card discover-waiting">
+          <p>내일 찾게 될 나의 강점을 기다려주세요</p>
+        </div>
+      ) : (
+        <div className="discover-card">
+          {!onboardingDone && (
+            <div className="discover-onboarding-badge">
+              첫 걸음 {onboardingStep + 1} / {ONBOARDING_QUESTIONS.length}
+            </div>
+          )}
+          <h2 className="discover-question">{question.text}</h2>
+          <textarea
+            className="discover-answer"
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+            placeholder="솔직하게 답해보세요..."
+            rows={4}
+          />
+          {error && <div className="discover-error">{error}</div>}
+          <button className="discover-submit" onClick={handleSubmit} disabled={loading || !answer.trim()}>
+            {loading ? '발견 중...' : '강점 발견하기'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

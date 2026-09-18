@@ -1,13 +1,15 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { CardView } from '../../components/Card';
-import type { Candidate } from '../../types';
+import type { Candidate, CardType } from '../../types';
 
 export function RevealAnimation({
   cards,
+  type = 'base',
   onDone,
 }: {
   cards: Candidate[];
+  type?: CardType;
   onDone: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,7 +39,7 @@ export function RevealAnimation({
       <div className="reveal-cards" ref={containerRef}>
         {cards.map((c, i) => (
           <div className="reveal-card" key={i}>
-            <CardView name={c.name} description={c.description} type="base" size="lg" />
+            <CardView name={c.name} description={c.description} type={type} subtype={c.subtype} size="lg" />
           </div>
         ))}
       </div>

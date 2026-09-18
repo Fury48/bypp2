@@ -44,7 +44,7 @@ export function Altar({
             onDrop={handleDrop(i)}
           >
             {card ? (
-              <CardView name={card.name} description={card.description} type={card.type} />
+              <CardView name={card.name} description={card.description} type={card.type} subtype={card.subtype} />
             ) : (
               <div className="forge-slot__empty">카드를 놓으세요</div>
             )}

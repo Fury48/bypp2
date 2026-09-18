@@ -2,7 +2,7 @@ import { corsHeaders } from '../_shared/cors.ts';
 import { callGroqTool } from '../_shared/groq.ts';
 
 interface ExtractResult {
-  cards: { name: string; description: string }[];
+  cards: { name: string; description: string; subtype: 'character' | 'talent' }[];
 }
 
 Deno.serve(async (req) => {
@@ -28,7 +28,10 @@ Deno.serve(async (req) => {
         '직접 연결되어야 합니다. 답변과 무관한 일반적인 성격 단어(끈기, 노력 등)로 뭉뚱그리지 마세요.\n' +
         '예시: 답변이 "컴퓨터 문제를 자주 해결해준다"라면 → [문제 해결], [컴퓨터 활용] 같은 카드가 적절합니다.\n' +
         '답변이 짧아도 그 안의 구체적 내용에서 강점을 반드시 최소 1개 이상 찾아내세요. ' +
-        '"정보 없음" 같은 카드는 절대 만들지 마세요.',
+        '"정보 없음" 같은 카드는 절대 만들지 마세요.\n' +
+        '각 카드는 subtype을 반드시 "character" 또는 "talent" 중 하나로 분류하세요. ' +
+        '"character"는 성향·태도·기질에 가까운 강점(예: 끈기, 공감, 침착함, 책임감), ' +
+        '"talent"는 구체적인 기술·재능에 가까운 강점(예: 코딩, 글쓰기, 그림, 분석, 운동)입니다.',
       userMessage: `질문: ${question}\n답변: ${answer}`,
       temperature: 0.2,
       toolName: 'report_cards',
@@ -45,8 +48,9 @@ Deno.serve(async (req) => {
               properties: {
                 name: { type: 'string' },
                 description: { type: 'string' },
+                subtype: { type: 'string', enum: ['character', 'talent'] },
               },
-              required: ['name', 'description'],
+              required: ['name', 'description', 'subtype'],
             },
           },
         },

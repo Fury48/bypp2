@@ -1,4 +1,4 @@
-export type Screen = 'discover' | 'deck' | 'forge' | 'codex';
+export type Screen = 'discover' | 'deck' | 'forge' | 'codex' | 'social';
 
 const TABS: { id: Screen; label: string; sublabel: string; icon: JSX.Element }[] = [
   {
@@ -44,6 +44,19 @@ const TABS: { id: Screen; label: string; sublabel: string; icon: JSX.Element }[]
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <circle cx="12" cy="12" r="8.5" />
         <path d="M15 9l-4 3-2 4 4-3z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'social',
+    label: 'SOCIAL',
+    sublabel: '친구 둘러보기',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <circle cx="9" cy="9" r="3" />
+        <path d="M3.5 19c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5" />
+        <circle cx="17" cy="8" r="2.3" />
+        <path d="M14.8 13.8c2.5.2 4.5 2.4 4.5 5.2" />
       </svg>
     ),
   },

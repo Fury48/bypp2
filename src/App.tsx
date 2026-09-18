@@ -9,6 +9,7 @@ import { DiscoverScreen } from './screens/Discover/DiscoverScreen';
 import { MyDeckScreen } from './screens/MyDeck/MyDeckScreen';
 import { ForgeScreen } from './screens/Forge/ForgeScreen';
 import { CodexScreen } from './screens/Codex/CodexScreen';
+import { SocialScreen } from './screens/Social/SocialScreen';
 
 export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
@@ -50,10 +51,13 @@ export default function App() {
         </svg>
       </button>
       <main className="app-main">
-        {screen === 'discover' && <DiscoverScreen cards={cards} refresh={refresh} />}
+        {screen === 'discover' && (
+          <DiscoverScreen cards={cards} refresh={refresh} onOnboardingComplete={() => setScreen('deck')} />
+        )}
         {screen === 'deck' && <MyDeckScreen cards={cards} />}
         {screen === 'forge' && <ForgeScreen cards={cards} refresh={refresh} />}
         {screen === 'codex' && <CodexScreen cards={cards} />}
+        {screen === 'social' && <SocialScreen />}
       </main>
       <NavTabs active={screen} onChange={setScreen} locked={!onboardingDone} />
     </div>

@@ -1,4 +1,5 @@
 export type CardType = 'base' | 'composite';
+export type CardSubtype = 'character' | 'talent';
 
 export interface Card {
   id: string;
@@ -6,6 +7,7 @@ export interface Card {
   name: string;
   description: string | null;
   type: CardType;
+  subtype: CardSubtype | null;
   parent_a_id: string | null;
   parent_b_id: string | null;
   parent_c_id: string | null;
@@ -16,4 +18,5 @@ export interface Card {
 export interface Candidate {
   name: string;
   description: string;
+  subtype?: CardSubtype;
 }

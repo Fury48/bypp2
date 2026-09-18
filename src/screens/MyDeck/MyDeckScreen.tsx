@@ -13,7 +13,7 @@ export function MyDeckScreen({ cards }: { cards: Card[] }) {
       ) : (
         <div className="deck-grid">
           {baseCards.map((c) => (
-            <CardView key={c.id} name={c.name} description={c.description} type="base" />
+            <CardView key={c.id} name={c.name} description={c.description} type="base" subtype={c.subtype} />
           ))}
         </div>
       )}
