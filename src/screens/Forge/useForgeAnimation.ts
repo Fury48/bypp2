@@ -56,7 +56,7 @@ export function useForgeAnimation(refs: ForgeRefs) {
       .timeline()
       .set(refs.altar.current, { y: 200, opacity: 0 })
       .set([refs.slotA.current, refs.slotB.current, refs.slotC.current], { opacity: 0 })
-      .to(refs.overlay.current, { opacity: 0.7, duration: 0.3 })
+      .to(refs.overlay.current, { opacity: 0.15, duration: 0.3 })
       .to(refs.altar.current, { y: 0, opacity: 1, duration: 0.5, ease: 'back.out(1.4)' })
       .to(refs.stage.current, { x: 8, duration: 0.05, repeat: 5, yoyo: true })
       .fromTo(refs.slotA.current, { x: -260, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4 }, '<')

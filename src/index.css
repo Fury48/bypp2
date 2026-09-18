@@ -22,16 +22,10 @@ body {
   overflow-x: hidden;
   font-family: var(--font-body);
   color: var(--ink);
-  background: var(--void);
-}
-
-.app,
-.auth-screen,
-.app-loading {
   background:
-    radial-gradient(ellipse 900px 500px at 20% 90%, rgba(255, 122, 60, 0.16), transparent 60%),
-    radial-gradient(ellipse 700px 500px at 85% 15%, rgba(212, 160, 84, 0.1), transparent 60%),
-    linear-gradient(180deg, #100c08 0%, #17120c 40%, #0b0906 100%);
+    linear-gradient(180deg, rgba(11, 9, 6, 0.55), rgba(11, 9, 6, 0.75)),
+    url('../assets/background/background.png') center center / cover no-repeat fixed;
+  background-color: var(--void);
 }
 
 .app {
