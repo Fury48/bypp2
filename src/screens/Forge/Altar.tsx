@@ -2,6 +2,8 @@ import type { DragEvent } from 'react';
 import { CardView } from '../../components/Card';
 import type { Card } from '../../types';
 import type { ForgeRefs } from './useForgeAnimation';
+import forgeBackgroundArt from '../../../assets/forge/forge_background.png';
+import forgeSlotArt from '../../../assets/forge/forge_slot.png';
 
 const SLOT_REF_KEYS = ['slotA', 'slotB', 'slotC'] as const;
 
@@ -31,13 +33,14 @@ export function Altar({
   }
 
   return (
-    <div className="forge-stage" ref={refs.stage}>
+    <div className="forge-stage" ref={refs.stage} style={{ backgroundImage: `url(${forgeBackgroundArt})` }}>
       <div className="forge-overlay" ref={refs.overlay} />
       <div className="forge-altar" ref={refs.altar}>
         {slots.map((card, i) => (
           <div
             key={i}
             className="forge-slot"
+            style={{ backgroundImage: `url(${forgeSlotArt})` }}
             ref={refs[SLOT_REF_KEYS[i]]}
             onClick={() => card && onClearSlot(i)}
             onDragOver={(e) => e.preventDefault()}
