@@ -19,6 +19,7 @@
 
 body {
   margin: 0;
+  overflow-x: hidden;
   font-family: var(--font-body);
   color: var(--ink);
   background: var(--void);
@@ -617,7 +618,9 @@ body {
 }
 
 .forge-rail {
-  width: 100%;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
   flex: 1;
   display: flex;
   min-height: 0;
@@ -645,7 +648,7 @@ body {
   align-items: center;
   overflow-x: auto;
   gap: 16px;
-  padding: 4px 4px 12px;
+  padding: 4px 24px 12px;
   scroll-snap-type: x proximity;
   width: 100%;
 }
