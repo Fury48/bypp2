@@ -13,8 +13,8 @@ import { SocialScreen } from './screens/Social/SocialScreen';
 
 export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
-  const [screen, setScreen] = useState<Screen>('discover');
-  const { cards, refresh } = useCards();
+  const [screen, setScreen] = useState<Screen>('codex');
+  const { cards, loading, refresh } = useCards();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -31,8 +31,8 @@ export default function App() {
   const onboardingDone = isOnboardingComplete(cards);
 
   useEffect(() => {
-    if (!onboardingDone) setScreen('discover');
-  }, [onboardingDone]);
+    if (!loading && !onboardingDone) setScreen('discover');
+  }, [loading, onboardingDone]);
 
   if (session === undefined) {
     return <div className="app-loading">불러오는 중...</div>;

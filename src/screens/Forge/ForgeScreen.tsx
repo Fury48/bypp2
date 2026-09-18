@@ -8,6 +8,11 @@ import { useForgeAnimation, type ForgeRefs } from './useForgeAnimation';
 
 const SLOT_COUNT = 3;
 
+function railOrder(c: Card) {
+  if (c.type === 'composite') return 2;
+  return c.subtype === 'talent' ? 1 : 0;
+}
+
 export function ForgeScreen({
   cards,
   refresh,
@@ -35,6 +40,7 @@ export function ForgeScreen({
   const [error, setError] = useState<string | null>(null);
 
   const filledCards = slots.filter((c): c is Card => c !== null);
+  const railCards = [...cards].sort((a, b) => railOrder(a) - railOrder(b));
 
   useEffect(() => {
     playIntro();
@@ -145,7 +151,7 @@ export function ForgeScreen({
       {!candidates && (
         <div className="forge-rail">
           <div className="forge-rail__grid">
-            {cards.map((c) => (
+            {railCards.map((c) => (
               <CardView
                 key={c.id}
                 name={c.name}
