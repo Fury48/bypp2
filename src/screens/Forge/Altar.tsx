@@ -4,6 +4,7 @@ import type { Card } from '../../types';
 import type { ForgeRefs } from './useForgeAnimation';
 import forgeBackgroundArt from '../../../assets/forge/forge_background.png';
 import forgeSlotArt from '../../../assets/forge/forge_slot.png';
+import forgeButtonArt from '../../../assets/forge/forge_button.png';
 
 const SLOT_REF_KEYS = ['slotA', 'slotB', 'slotC'] as const;
 
@@ -59,7 +60,12 @@ export function Altar({
         </div>
         <div className="forge-flash" ref={refs.flash} />
       </div>
-      <button className="forge-combine-btn" onClick={onCombine} disabled={!canCombine || combining}>
+      <button
+        className="forge-combine-btn"
+        style={{ backgroundImage: `url(${forgeButtonArt})` }}
+        onClick={onCombine}
+        disabled={!canCombine || combining}
+      >
         {combining ? '조합 중...' : '조합하기'}
       </button>
     </div>

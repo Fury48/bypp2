@@ -38,6 +38,7 @@ export function ForgeScreen({
   const [candidates, setCandidates] = useState<Candidate[] | null>(null);
   const [reveal, setReveal] = useState<Candidate[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const candidatesRef = useRef<HTMLDivElement>(null);
 
   const filledCards = slots.filter((c): c is Card => c !== null);
   const railCards = [...cards].sort((a, b) => railOrder(a) - railOrder(b));
@@ -47,6 +48,12 @@ export function ForgeScreen({
     return () => killIntro();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (candidates) {
+      candidatesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [candidates]);
 
   function isInSlots(cardId: string) {
     return slots.some((c) => c?.id === cardId);
@@ -86,6 +93,7 @@ export function ForgeScreen({
         });
         if (fnError) throw fnError;
         setCandidates(data.candidates ?? []);
+        setCombining(false);
       } catch (e) {
         setError(e instanceof Error ? e.message : '조합에 실패했어요.');
         setCombining(false);
@@ -129,14 +137,14 @@ export function ForgeScreen({
         onClearSlot={clearSlot}
         onDropCard={dropCard}
         onCombine={handleCombine}
-        canCombine={filledCards.length >= 2}
+        canCombine={filledCards.length >= 2 && !candidates}
         combining={combining}
       />
 
       {error && <div className="forge-error">{error}</div>}
 
       {candidates && (
-        <div className="forge-candidates">
+        <div className="forge-candidates" ref={candidatesRef}>
           <h3>어떤 잠재력이 나와 가장 닮았나요?</h3>
           <div className="forge-candidates__grid">
             {candidates.map((c, i) => (
