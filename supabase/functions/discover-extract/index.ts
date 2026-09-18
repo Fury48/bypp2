@@ -1,0 +1,68 @@
+import { corsHeaders } from '../_shared/cors.ts';
+import { callGroqTool } from '../_shared/groq.ts';
+
+interface ExtractResult {
+  cards: { name: string; description: string }[];
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
+  try {
+    const { question, answer } = await req.json();
+    if (!question || !answer) {
+      return new Response(JSON.stringify({ error: 'question and answer are required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'content-type': 'application/json' },
+      });
+    }
+
+    const result = await callGroqTool<ExtractResult>({
+      system:
+        '당신은 사용자의 답변에서 실제 "강점 카드"를 추출하는 역할입니다. ' +
+        '질문과 답변이 주어지면, 답변에 등장하는 구체적인 행동·소재·대상을 근거로 ' +
+        '강점을 1~3개, 짧은 카드 이름(2~6글자)과 한 줄 설명으로 추출하세요. ' +
+        '카드 이름과 설명은 답변에 나온 구체적인 단어(예: 컴퓨터, 아이디어, 기획, 친구 등)와 ' +
+        '직접 연결되어야 합니다. 답변과 무관한 일반적인 성격 단어(끈기, 노력 등)로 뭉뚱그리지 마세요.\n' +
+        '예시: 답변이 "컴퓨터 문제를 자주 해결해준다"라면 → [문제 해결], [컴퓨터 활용] 같은 카드가 적절합니다.\n' +
+        '답변이 짧아도 그 안의 구체적 내용에서 강점을 반드시 최소 1개 이상 찾아내세요. ' +
+        '"정보 없음" 같은 카드는 절대 만들지 마세요.',
+      userMessage: `질문: ${question}\n답변: ${answer}`,
+      temperature: 0.2,
+      toolName: 'report_cards',
+      toolDescription: '답변에서 추출한 강점 카드 목록을 보고합니다.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          cards: {
+            type: 'array',
+            minItems: 1,
+            maxItems: 3,
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                description: { type: 'string' },
+              },
+              required: ['name', 'description'],
+            },
+          },
+        },
+        required: ['cards'],
+      },
+    });
+
+    result.cards = result.cards.slice(0, 3);
+
+    return new Response(JSON.stringify(result), {
+      headers: { ...corsHeaders, 'content-type': 'application/json' },
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : 'unknown error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'content-type': 'application/json' },
+    });
+  }
+});

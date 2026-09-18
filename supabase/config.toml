@@ -1,0 +1,7 @@
+project_id = "bypp2"
+
+[functions.discover-extract]
+verify_jwt = true
+
+[functions.forge-combine]
+verify_jwt = true

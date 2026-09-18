@@ -1,0 +1,83 @@
+.card {
+  border-radius: 12px;
+  border: 1px solid var(--gold-dim);
+  background: linear-gradient(160deg, var(--stone-2), var(--stone-1));
+  color: var(--ink);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: var(--gold);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+}
+
+.card--sm {
+  width: 90px;
+  height: 120px;
+}
+
+.card--md {
+  width: 140px;
+  height: 190px;
+}
+
+.card--lg {
+  width: 200px;
+  height: 270px;
+}
+
+.card--composite {
+  border-color: var(--gold);
+  background: linear-gradient(160deg, #3a2a10, #241a0a);
+}
+
+.card--selected {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 2px;
+}
+
+.card--unknown {
+  border-style: dashed;
+  background: rgba(212, 160, 84, 0.05);
+}
+
+.card--face-down .card__back,
+.card--unknown .card__unknown {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gold-dim);
+}
+
+.card__face {
+  padding: 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--gold-bright);
+}
+
+.card__desc {
+  font-size: 0.72rem;
+  color: var(--ink-dim);
+}
+
+.card__recipe {
+  font-size: 0.65rem;
+  color: var(--ink-dim);
+  margin-top: auto;
+}
