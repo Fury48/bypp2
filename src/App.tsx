@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { NavTabs, type Screen } from './components/NavTabs';
 import { supabase } from './lib/supabase';
 import { useCards } from './hooks/useCards';
-import { isOnboardingComplete } from './data/questions';
+import { useAnsweredQuestions } from './hooks/useAnsweredQuestions';
+import { isOnboardingComplete, toAnswered } from './data/questions';
 import { AuthScreen } from './screens/Auth/AuthScreen';
 import { DiscoverScreen } from './screens/Discover/DiscoverScreen';
 import { MyDeckScreen } from './screens/MyDeck/MyDeckScreen';
@@ -16,6 +17,7 @@ export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [screen, setScreen] = useState<Screen>('codex');
   const { cards, loading, refresh } = useCards();
+  const { answers, refresh: refreshAnswers } = useAnsweredQuestions();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -26,10 +28,14 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (session) refresh();
-  }, [session, refresh]);
+    if (session) {
+      refresh();
+      refreshAnswers();
+    }
+  }, [session, refresh, refreshAnswers]);
 
-  const onboardingDone = isOnboardingComplete(cards);
+  const answered = useMemo(() => toAnswered(cards, answers), [cards, answers]);
+  const onboardingDone = isOnboardingComplete(answered);
 
   useEffect(() => {
     if (!loading && !onboardingDone) setScreen('discover');
@@ -56,7 +62,12 @@ export default function App() {
       </div>
       <main className="app-main">
         {screen === 'discover' && (
-          <DiscoverScreen cards={cards} refresh={refresh} onOnboardingComplete={() => setScreen('deck')} />
+          <DiscoverScreen
+            answered={answered}
+            refresh={refresh}
+            refreshAnswers={refreshAnswers}
+            onOnboardingComplete={() => setScreen('deck')}
+          />
         )}
         {screen === 'deck' && <MyDeckScreen cards={cards} />}
         {screen === 'forge' && <ForgeScreen cards={cards} refresh={refresh} />}

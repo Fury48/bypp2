@@ -6,6 +6,11 @@ export interface Question {
   category?: string;
 }
 
+export interface AnsweredQuestion {
+  question_id: string;
+  created_at: string;
+}
+
 export const ONBOARDING_QUESTIONS: Question[] = [
   { id: 'onboard-1', text: '나는 무엇을 할 때 가장 몰입이 잘되는가?', category: 'onboarding' },
   { id: 'onboard-2', text: '사소하더라도 내가 꾸준히 하는 활동은?', category: 'onboarding' },
@@ -32,18 +37,26 @@ export const QUESTIONS: Question[] = [
   { id: 'q15', text: '혼자 있을 때 자연스럽게 하게 되는 활동은?', category: 'passion' },
 ];
 
-function answeredIds(cards: Card[]) {
-  return new Set(cards.map((c) => c.source_question_id).filter(Boolean));
+/** 카드가 생성되지 않은 답변도 "답했음"으로 치도록 cards와 question_answers 로그를 합친다. */
+export function toAnswered(cards: Card[], extra: AnsweredQuestion[] = []): AnsweredQuestion[] {
+  const fromCards = cards
+    .filter((c) => !!c.source_question_id)
+    .map((c) => ({ question_id: c.source_question_id as string, created_at: c.created_at }));
+  return [...fromCards, ...extra];
 }
 
-export function isOnboardingComplete(cards: Card[]) {
-  const answered = answeredIds(cards);
-  return ONBOARDING_QUESTIONS.every((q) => answered.has(q.id));
+function answeredIdSet(answered: AnsweredQuestion[]) {
+  return new Set(answered.map((a) => a.question_id));
 }
 
-export function getNextOnboardingQuestion(cards: Card[]): Question | null {
-  const answered = answeredIds(cards);
-  return ONBOARDING_QUESTIONS.find((q) => !answered.has(q.id)) ?? null;
+export function isOnboardingComplete(answered: AnsweredQuestion[]) {
+  const ids = answeredIdSet(answered);
+  return ONBOARDING_QUESTIONS.every((q) => ids.has(q.id));
+}
+
+export function getNextOnboardingQuestion(answered: AnsweredQuestion[]): Question | null {
+  const ids = answeredIdSet(answered);
+  return ONBOARDING_QUESTIONS.find((q) => !ids.has(q.id)) ?? null;
 }
 
 /** 모든 유저에게 동일한, 하루에 하나씩 바뀌는 질문. */
@@ -63,8 +76,8 @@ export function isSameUTCDate(isoA: string, isoB: string) {
 }
 
 /** 오늘의 질문에 이미 답했는지 여부 (온보딩 완료 이후에만 의미 있음). */
-export function hasAnsweredToday(cards: Card[]): boolean {
+export function hasAnsweredToday(answered: AnsweredQuestion[]): boolean {
   const today = getDailyQuestion();
   const now = new Date().toISOString();
-  return cards.some((c) => c.source_question_id === today.id && isSameUTCDate(c.created_at, now));
+  return answered.some((a) => a.question_id === today.id && isSameUTCDate(a.created_at, now));
 }

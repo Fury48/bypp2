@@ -6,30 +6,33 @@ import {
   getDailyQuestion,
   hasAnsweredToday,
   isOnboardingComplete,
+  type AnsweredQuestion,
 } from '../../data/questions';
-import type { Card, Candidate } from '../../types';
+import type { Candidate } from '../../types';
 import { RevealAnimation } from './RevealAnimation';
 import { SignageTitle } from '../../components/SignageTitle';
 import questionBoxArt from '../../../assets/discover/question_box.png';
 
 export function DiscoverScreen({
-  cards,
+  answered,
   refresh,
+  refreshAnswers,
   onOnboardingComplete,
 }: {
-  cards: Card[];
+  answered: AnsweredQuestion[];
   refresh: () => Promise<void>;
+  refreshAnswers: () => Promise<void>;
   onOnboardingComplete?: () => void;
 }) {
-  const onboardingDone = isOnboardingComplete(cards);
-  const nextOnboardingQuestion = useMemo(() => getNextOnboardingQuestion(cards), [cards]);
+  const onboardingDone = isOnboardingComplete(answered);
+  const nextOnboardingQuestion = useMemo(() => getNextOnboardingQuestion(answered), [answered]);
   const onboardingStep = nextOnboardingQuestion
     ? ONBOARDING_QUESTIONS.findIndex((q) => q.id === nextOnboardingQuestion.id)
     : -1;
   const isLastOnboardingQuestion = onboardingStep === ONBOARDING_QUESTIONS.length - 1;
 
   const question = onboardingDone ? getDailyQuestion() : nextOnboardingQuestion!;
-  const answeredToday = onboardingDone && hasAnsweredToday(cards);
+  const answeredToday = onboardingDone && hasAnsweredToday(answered);
 
   const [answer, setAnswer] = useState('');
   const [loading, setLoading] = useState(false);
@@ -47,29 +50,33 @@ export function DiscoverScreen({
       });
       if (fnError) throw fnError;
       const newCards: Candidate[] = data.cards ?? [];
-      if (newCards.length === 0) {
-        setError('강점을 발견하지 못했어요. 조금 더 구체적으로 답해볼까요?');
-        setLoading(false);
-        return;
-      }
 
       const { data: userData } = await supabase.auth.getUser();
       const userId = userData.user?.id;
-      await supabase.from('cards').insert(
-        newCards.map((c) => ({
-          user_id: userId,
-          name: c.name,
-          description: c.description,
-          type: 'base' as const,
-          subtype: c.subtype ?? null,
-          source_question_id: question.id,
-        }))
-      );
 
-      setRevealWasFinalOnboarding(!onboardingDone && isLastOnboardingQuestion);
-      setRevealCards(newCards);
+      // 카드를 찾지 못했더라도 이 질문에 답했다는 사실은 남겨서 다음 질문으로 넘어가게 한다.
+      await supabase.from('question_answers').insert({ user_id: userId, question_id: question.id });
+
+      if (newCards.length > 0) {
+        await supabase.from('cards').insert(
+          newCards.map((c) => ({
+            user_id: userId,
+            name: c.name,
+            description: c.description,
+            type: 'base' as const,
+            subtype: c.subtype ?? null,
+            source_question_id: question.id,
+          }))
+        );
+      }
+
       setAnswer('');
-      await refresh();
+      await Promise.all([refresh(), refreshAnswers()]);
+
+      if (newCards.length > 0) {
+        setRevealWasFinalOnboarding(!onboardingDone && isLastOnboardingQuestion);
+        setRevealCards(newCards);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : '알 수 없는 오류가 발생했어요.');
     } finally {
